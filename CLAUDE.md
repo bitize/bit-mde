@@ -37,7 +37,14 @@ Quem não tem um A1 em mãos pode rodar `npm run certs:teste`, que gera um autoa
 
 ### CI
 
-`.github/workflows/ci.yml` roda em push e PR na `main`, com matriz Node 20/22/24: `npm install` → `npm run certs:teste` → `npm run test:ci` → `npm run build`. Usa `npm install` em vez de `npm ci`, e não habilita `cache: npm`, porque `package-lock.json` é gitignored — os dois exigem o lockfile versionado.
+Dois workflows, ambos em push e PR na `main`:
+
+- `.github/workflows/testes.yml` — matriz Node 20/22/24: `npm install` → `npm run certs:teste` → `npm run test:ci`.
+- `.github/workflows/qualidade.yml` — dois jobs paralelos em Node 22: `npm run format:check` (Prettier) e `npm run build`.
+
+Ambos usam `npm install` em vez de `npm ci` e não habilitam `cache: npm`, porque `package-lock.json` é gitignored — os dois exigem o lockfile versionado.
+
+`prettier.config.js` fixa `endOfLine: 'auto'` e isso é obrigatório enquanto não houver `.gitattributes`: com `core.autocrlf=true` no Windows o working tree fica em CRLF, enquanto a CI em Linux vê LF. Com o padrão `'lf'` do Prettier, `format:check` acusaria todos os arquivos na máquina dos devs e nenhum na CI. O Prettier é dependência de dev fixada — não trocar por `npx prettier` solto, que baixaria uma versão diferente a cada run.
 
 ### Build e versão
 
@@ -70,7 +77,7 @@ env/           constantes: endpoints por tpAmb, cadeia CA ICP-Brasil, EVENTOS, C
 
 **Imutabilidade.** Praticamente todo módulo exporta `Object.freeze(Classe)`, e as instâncias de `apis/` congelam `this` e `this.config`. Existem testes que asseguram isso (`assert.throws` ao sobrescrever um método estático). Consequência prática: `requestOptions` e `httpsOptions` chegam congelados no `SefazService`, que precisa copiá-los (`{ ...opts.httpsOptions }`) antes de mesclar — foi exatamente a origem do bug #22 (`Cannot add property rejectUnauthorized, object is not extensible`).
 
-**Assinatura digital.** Só a recepção de evento assina. `RecepcaoHelper.montarRequest` assina cada `infEvento` individualmente com `xml-crypto` (referência `//*[local-name(.)='infEvento']`, assinatura inserida *depois* do nó) e depois faz *splice de string* nos blocos `<evento versao="1.00">…` para montar o lote dentro de um único `<envEvento>`. Mexer no formato do XML gerado pelo schema pode quebrar esse recorte por `indexOf`.
+**Assinatura digital.** Só a recepção de evento assina. `RecepcaoHelper.montarRequest` assina cada `infEvento` individualmente com `xml-crypto` (referência `//*[local-name(.)='infEvento']`, assinatura inserida _depois_ do nó) e depois faz _splice de string_ nos blocos `<evento versao="1.00">…` para montar o lote dentro de um único `<envEvento>`. Mexer no formato do XML gerado pelo schema pode quebrar esse recorte por `indexOf`.
 
 **Ambiente.** `tpAmb` é string: `'1'` produção, `'2'` homologação. É a chave dos mapas em `env/distribuicao.js` e `env/recepcao.js`.
 

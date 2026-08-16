@@ -1,0 +1,8 @@
+# Saída de build: lib/ é gerado pelo UglifyJS e dist/ pelo tsc.
+lib
+dist
+
+# Certificados (gitignored, mas podem existir localmente).
+certs
+
+package-lock.json

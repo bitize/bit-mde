@@ -10,6 +10,8 @@
     "release": "git pull && npm publish",
     "test": "mocha",
     "test:ci": "mocha --ignore test/sefaz.test.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "certs:teste": "sh ./scripts/gerar-certificado-teste.sh",
     "types": "npx tsc"
   },
@@ -56,6 +58,7 @@
     "@types/node": "^26.2.0",
     "@types/node-forge": "^1.3.14",
     "mocha": "^11.8.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "uglify-js": "^3.19.3"
   },

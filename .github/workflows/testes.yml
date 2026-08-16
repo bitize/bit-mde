@@ -1,4 +1,4 @@
-name: CI
+name: Testes
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Testes (Node ${{ matrix.node-version }})
+    name: Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -37,7 +37,3 @@ jobs:
       # produção e homologação da SEFAZ, e exige certificado ICP-Brasil válido.
       - name: Rodar testes
         run: npm run test:ci
-
-      # Garante que lib/ e dist/ ainda são geráveis — o pacote não é publicável sem isso.
-      - name: Build
-        run: npm run build
