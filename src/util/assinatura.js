@@ -2,20 +2,6 @@
 
 const SignedXml = require('xml-crypto').SignedXml
 
-class InfoProvider {
-  /**
-   *
-   * @param {string} cert
-   */
-  constructor(cert) {
-    this.getKeyInfo = function () {
-      return `<X509Data><X509Certificate>${cert
-        .split('-----')[2]
-        .replace(/[\r\n]/g, '')}</X509Certificate></X509Data>`
-    }
-  }
-}
-
 class Assinatura {
   /**
    *
@@ -30,13 +16,24 @@ class Assinatura {
       'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
       'http://www.w3.org/TR/2001/REC-xml-c14n-20010315',
     ]
-    const sig = new SignedXml()
+    // A NF-e exige RSA-SHA1 e digest SHA1. Até a v2 o xml-crypto usava esses
+    // algoritmos por padrão; a partir da v3 eles precisam ser informados.
+    const sig = new SignedXml({
+      privateKey: key,
+      publicCert: cert,
+      canonicalizationAlgorithm: transforms[1],
+      signatureAlgorithm: 'http://www.w3.org/2000/09/xmldsig#rsa-sha1',
+      getKeyInfoContent: () =>
+        `<X509Data><X509Certificate>${cert
+          .split('-----')[2]
+          .replace(/[\r\n]/g, '')}</X509Certificate></X509Data>`,
+    })
 
-    sig.keyInfoProvider = new InfoProvider(cert)
-
-    sig.addReference(xpath, transforms)
-    sig.canonicalizationAlgorithm = transforms[1]
-    sig.signingKey = key
+    sig.addReference({
+      xpath: xpath,
+      transforms: transforms,
+      digestAlgorithm: 'http://www.w3.org/2000/09/xmldsig#sha1',
+    })
 
     sig.computeSignature(xml, {
       location: {

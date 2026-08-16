@@ -1,0 +1,79 @@
+name: Publicar
+
+# Dispara só em release publicado no GitHub — não em push na main. A tag do
+# release é a fonte da verdade da versão, e o release dá o ponto de aprovação
+# humana entre "está na main" e "está no npm".
+on:
+  release:
+    types: [published]
+
+# Trusted Publishing (OIDC): o npm troca este token de identidade do GitHub por
+# uma credencial de publicação de curta duração. Não existe NPM_TOKEN guardado
+# como secret — se `id-token: write` sumir daqui, a publicação passa a falhar
+# por falta de credencial. O job não escreve no repositório, então `contents`
+# fica em leitura e o GITHUB_TOKEN não é gravado no .git/config do runner.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publicar:
+    name: npm publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      # Trusted publishing exige npm >= 11.5.1, posterior ao npm que acompanha o
+      # Node 22. O range fixa o requisito sem pegar um major novo sem aviso.
+      - name: Atualizar npm
+        run: npm install -g npm@^11.5.1
+
+      # npm ci: instala exatamente o que está no package-lock.json, para que o
+      # build que vira pacote seja reproduzível.
+      - run: npm ci
+
+      # A tag manda no que é publicado. Se divergir do package.json, o pacote
+      # sairia com um número que ninguém pediu — e versão no npm não se reescreve.
+      - name: Conferir tag contra package.json
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSAO=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "v$VERSAO" ]; then
+            echo "Tag $TAG não corresponde ao package.json (esperado v$VERSAO)."
+            exit 1
+          fi
+
+      # src/env/version.js é commitado e alimenta o header User-Agent. Bumpar o
+      # package.json sem rodar `npm run build` deixa os dois fora de sincronia.
+      # Compara o valor, e não os bytes: o arquivo está em LF no índice e o build
+      # o reescreve em CRLF, então um `git diff` acusaria diferença sempre.
+      - name: Conferir src/env/version.js
+        run: node -e "const v=require('./src/env/version.js').VERSION, p=require('./package.json').version; if (v!==p) { console.error('src/env/version.js está em '+v+', mas o package.json está em '+p+'. Rode npm run build e commite o resultado.'); process.exit(1) }"
+
+      # Repete a suíte já rodada na main: fecha a janela entre o último push e a
+      # criação da tag, que é justamente onde um release erra.
+      - name: Gerar certificado de teste
+        run: npm run certs:teste
+
+      - name: Rodar testes
+        run: npm run test:ci
+
+      # lib/ e dist/ são gitignored e gerados. Sem este passo o pacote sai sem o
+      # próprio código.
+      - name: Build
+        run: npm run build
+
+      # Sem --provenance: com trusted publishing o npm gera a atestação sozinho.
+      # Sem --access public: já está em publishConfig.access no package.json.
+      - name: Publicar no npm
+        run: npm publish

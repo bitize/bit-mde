@@ -2,6 +2,26 @@
 
 ## [Não publicado]
 
+- Projeto passa a ser mantido pela Bitize em [bitize/bit-mde](https://github.com/bitize/bit-mde), como fork de [lucashpmelo/node-mde](https://github.com/lucashpmelo/node-mde)
+- Pacote renomeado de `node-mde` para `@bitize/bit-mde` — atualize a instalação e os `require`/`import`. A API pública permanece inalterada
+- `README.md` passa a referenciar o [BitERP](https://www.biterp.ai), produto que mantém e utiliza a biblioteca
+- Pacote passa a ser publicado pela CI, com provenance: cada versão no npm fica vinculada de forma verificável ao commit e ao workflow que a produziu
+
+### Segurança
+
+- Atualizadas as dependências npm, zerando as 7 vulnerabilidades reportadas pelo `npm audit` (1 crítica, 5 altas, 1 moderada):
+  - `axios` 1.8.3 → 1.19.0
+  - `fast-xml-parser` 4.5.3 → 5.11.0
+  - `node-forge` 1.3.1 → 1.4.0
+  - `xml-crypto` 2.1.6 → 6.1.2, que traz `@xmldom/xmldom` 0.8.14
+- Adicionado `overrides` para `diff` e `serialize-javascript`, dependências transitivas do `mocha` (somente desenvolvimento) cujas versões corrigidas estão fora do range declarado pelo próprio `mocha`
+
+### Modificado
+
+- `Assinatura.assinarXml` adaptada à API do `xml-crypto` 6: as opções passam pelo construtor (`privateKey`, `publicCert`, `getKeyInfoContent`) e `addReference` recebe um objeto. Os algoritmos exigidos pela NF-e (`rsa-sha1` e digest `sha1`) agora são informados explicitamente, pois deixaram de ser o padrão da biblioteca a partir da v3. O XML assinado gerado permanece byte a byte idêntico ao das versões anteriores
+- Dependências de desenvolvimento: `mocha` 10 → 11, `@types/node` 22 → 26. Removido `@types/xml-crypto`, que se tornou desnecessário porque o `xml-crypto` 6 já publica seus próprios tipos
+- Reflexo do `@types/node` 26 no `dist/index.d.ts`: `import('https').AgentOptions` passou a ser emitido como `import('node:https').AgentOptions` — equivalente para qualquer consumidor com `@types/node` >= 16
+
 ## [0.14.13] / 2025-04-23
 
 - Node lançando erro `TypeError: Cannot add property rejectUnauthorized, object is not extensible` #22
@@ -325,7 +345,9 @@
   - 210220 - Desconhecimento da Operação
   - 210240 - Operação não Realizada
 
-[não publicado]: https://github.com/lucashpmelo/node-mde/compare/0.14.13..HEAD
+Os links das versões até a `0.14.13` apontam para o repositório original, [lucashpmelo/node-mde](https://github.com/lucashpmelo/node-mde), onde essas versões foram publicadas.
+
+[não publicado]: https://github.com/bitize/bit-mde/commits/main
 [0.14.13]: https://github.com/lucashpmelo/node-mde/compare/0.14.12...0.14.13
 [0.14.12]: https://github.com/lucashpmelo/node-mde/compare/0.14.11...0.14.12
 [0.14.11]: https://github.com/lucashpmelo/node-mde/compare/0.14.10...0.14.11

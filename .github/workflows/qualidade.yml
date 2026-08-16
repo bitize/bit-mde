@@ -1,0 +1,53 @@
+name: Qualidade
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Nenhum job aqui escreve no repositório: leitura basta, e o GITHUB_TOKEN
+# não fica gravado no .git/config dos runners (persist-credentials: false).
+permissions:
+  contents: read
+
+jobs:
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verificar formatação
+        run: npm run format:check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - run: npm ci
+
+      # Garante que lib/ (UglifyJS) e dist/ (tsc) ainda são geráveis — o pacote
+      # não é publicável sem isso, e ambos são gitignored.
+      - name: Build
+        run: npm run build
