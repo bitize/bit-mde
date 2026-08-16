@@ -36,7 +36,7 @@ Como o workflow refaz o build, `lib/` e `dist/` saem sempre do fonte daquela tag
 Roda `npm pack --dry-run --json` **depois** do build — antes dele `lib/` e `dist/` não existem — e reprova o release em dois casos:
 
 - o tarball contém caminho proibido: `src/`, `test/`, `scripts/`, `certs/`, `.docs/`, `.github/`, `.vscode/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `.prettierignore`, `package-lock.json`, `tsconfig.json`, `prettier.config.js`;
-- falta caminho essencial: `lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md`, `LICENSE`.
+- falta caminho essencial: `lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md`, `LICENSE`, `CHANGELOG.md`.
 
 A conferência é **por regra, não por snapshot** da lista de arquivos: `lib/` espelha `src/`, então uma lista congelada quebraria a cada arquivo novo do fonte e acabaria sendo atualizada no reflexo, sem ninguém ler o diff.
 

@@ -109,12 +109,17 @@ jobs:
             'tsconfig.json',
             'prettier.config.js',
           ]
+          // CHANGELOG.md entra no pacote só porque o `files` o lista — o npm não
+          // o inclui por conta própria, ao contrário de package.json, README e
+          // LICENSE. Por isso ele precisa estar aqui: tirá-lo do `files` passaria
+          // despercebido de outro jeito.
           const essenciais = [
             'lib/index.js',
             'dist/index.d.ts',
             'package.json',
             'README.md',
             'LICENSE',
+            'CHANGELOG.md',
           ]
 
           const vazando = caminhos.filter((p) =>

@@ -45,13 +45,13 @@ Havia um segundo risco, mais grave e sem sintoma. O `.gitignore` lista `lib` e `
 
 Três detalhes são load-bearing:
 
-- `package.json`, `README.md` e `LICENSE` entram sempre, independente do `files`. `CHANGELOG.md` é listado explicitamente para não depender de comportamento herdado de versões antigas do npm.
+- `package.json`, `README.md` e `LICENSE` entram sempre, independente do `files`. `CHANGELOG.md` **não** — o npm não o inclui por conta própria, então a entrada no `files` é o único motivo de ele estar no pacote. Verificado empacotando com `files` reduzido a `lib/` e `dist/`: o tarball sai sem ele.
 - `"./package.json": "./package.json"` é obrigatório. Sem essa entrada, o `exports` bloqueia a leitura do próprio manifesto, que várias ferramentas fazem.
 - `types` vem **antes** de `require` e `default`. O TypeScript resolve pela primeira condição que casa.
 
 `main` e `types` continuam declarados, para quem não entende `exports`. Os dois caminhos levam ao mesmo destino.
 
-O guard em [publicar.yml](../../../.github/workflows/publicar.yml) roda depois do build e reprova o release se o tarball contiver caminho proibido (`src/`, `test/`, `scripts/`, `certs/`, `.docs/`, `.github/`, `.vscode/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `.prettierignore`, `package-lock.json`, `tsconfig.json`, `prettier.config.js`) ou perder caminho essencial (`lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md`, `LICENSE`). Por regra, não por lista congelada — só fala quando algo saiu mesmo do lugar, e cobre inclusive alguém remover o `files`.
+O guard em [publicar.yml](../../../.github/workflows/publicar.yml) roda depois do build e reprova o release se o tarball contiver caminho proibido (`src/`, `test/`, `scripts/`, `certs/`, `.docs/`, `.github/`, `.vscode/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `.prettierignore`, `package-lock.json`, `tsconfig.json`, `prettier.config.js`) ou perder caminho essencial (`lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md`, `LICENSE`, `CHANGELOG.md`). Por regra, não por lista congelada — só fala quando algo saiu mesmo do lugar, e cobre inclusive alguém remover o `files`.
 
 ## Consequências
 
