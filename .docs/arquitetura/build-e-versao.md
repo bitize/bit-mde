@@ -50,9 +50,40 @@ Consequência: JSDoc desatualizado vira tipo errado publicado, e o erro só apar
 
 ## O que vai no pacote
 
-[.npmignore](../../.npmignore) exclui `src`, `scripts`, `test`, `.github`, `.vscode`, `certs`, `.docs`, `package-lock.json`, `tsconfig.json` e `prettier.config.js`. O publicado leva `lib/`, `dist/` e a documentação de raiz (`README.md`, `CHANGELOG.md`, `LICENSE`, etc.).
+Quem decide é o campo `files` do [package.json](../../package.json), uma **allowlist**:
 
-> Pasta com ponto **não** é excluída por padrão pelo npm — só um punhado de nomes fixos (`.git`, `.npmrc`, `.gitignore`…) é. `.github`, `.vscode` e `.docs` estão listados um a um por isso. Ao criar pasta nova de tooling na raiz, verificar se ela precisa entrar ali.
+```jsonc
+"files": ["lib/", "dist/", "CHANGELOG.md"]
+```
+
+O tarball sai com exatamente isso mais `package.json`, `README.md` e `LICENSE`, que o npm inclui sempre — 82 arquivos hoje. Não existe `.npmignore`: ele foi removido na 0.16.0, e **não deve voltar**. Com `files` declarado ele não decidiria a seleção de topo, só criaria a dúvida sobre qual dos dois manda. Ver [ADR 0011](decisoes/0011-files-e-exports-como-contrato-de-empacotamento.md).
+
+> A inversão a ter na cabeça: **silêncio agora significa exclusão**. Arquivo ou pasta nova na raiz fica fora do pacote por padrão, o que é o comportamento desejado. Quem quiser publicar algo novo precisa acrescentá-lo ao `files` de propósito.
+
+Conferir com `npm pack --dry-run` antes de qualquer release. A CI de publicação também confere, no passo descrito em [release.md](release.md).
+
+## Superfície de importação
+
+`exports` fecha o pacote na raiz:
+
+```jsonc
+"exports": {
+  ".": {
+    "types": "./dist/index.d.ts",
+    "require": "./lib/index.js",
+    "default": "./lib/index.js"
+  },
+  "./package.json": "./package.json"
+}
+```
+
+Consequência: `require('@bitize/bit-mde/lib/validators/nsu-validator')` e qualquer outro deep import falham com `ERR_PACKAGE_PATH_NOT_EXPORTED`. Só a raiz e o `package.json` resolvem. É o que permite mover arquivo dentro de `src/` sem quebrar consumidor.
+
+Três detalhes que não devem ser "simplificados":
+
+- **`"./package.json"` é obrigatório.** Sem essa entrada o `exports` bloqueia a leitura do próprio manifesto, que várias ferramentas fazem.
+- **`types` vem antes de `require` e `default`.** O TypeScript resolve pela primeira condição que casa.
+- **`main` e `types` continuam declarados** ao lado do `exports`, para bundler antigo que não o entende. Os dois caminhos levam ao mesmo destino.
 
 ## Checklist ao mudar a API pública
 

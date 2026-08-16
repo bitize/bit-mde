@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.16.0] / 2026-08-16
+
+### Adicionado
+
+- `files` no `package.json`, declarando explicitamente o que é publicado: `lib/`, `dist/` e `CHANGELOG.md`, mais `package.json`, `README.md` e `LICENSE`, que o npm sempre inclui. O tarball deixa de carregar `CLAUDE.md`, `AGENTS.md`, `.prettierignore`, `CODE_OF_CONDUCT.md` e `CONTRIBUTING.md`, que vinham na 0.15.0 — 86 arquivos passam a 82
+- `exports` no `package.json`, fechando a superfície pública na raiz do pacote. `main` e `types` seguem declarados, para quem não entende `exports`
+- A CI de publicação passa a conferir o conteúdo do tarball antes do `npm publish`, reprovando o release se um arquivo proibido entrar ou um essencial sumir
+
+### Modificado
+
+- `.npmignore` removido. O que vai no pacote passa a ser decidido só pelo `files`, que tem precedência sobre ele — manter os dois deixaria duas fontes de verdade para a mesma pergunta, com a de menor precedência dando a resposta errada. Ver [ADR 0011](https://github.com/bitize/bit-mde/blob/main/.docs/arquitetura/decisoes/0011-files-e-exports-como-contrato-de-empacotamento.md)
+
+### Compatibilidade
+
+Nenhuma assinatura da API pública muda, e a importação documentada no `README.md` continua idêntica — `require('@bitize/bit-mde')`, `import` e as três formas (`module.exports`, `.default`, `.mde`) funcionam como antes, assim como `require('@bitize/bit-mde/package.json')`.
+
+O que deixa de funcionar é o **deep import**: `require('@bitize/bit-mde/lib/validators/nsu-validator')` e similares passam a falhar com `ERR_PACKAGE_PATH_NOT_EXPORTED`. Nunca foi uso documentado, mas era possível na ausência do `exports` — daí o bump de minor. Quem dependia disso precisa passar pela raiz do pacote.
+
 ## [0.15.0] / 2026-08-16
 
 - Projeto passa a ser mantido pela Bitize em [bitize/bit-mde](https://github.com/bitize/bit-mde), como fork de [lucashpmelo/node-mde](https://github.com/lucashpmelo/node-mde)

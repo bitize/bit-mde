@@ -26,9 +26,21 @@ Na ordem:
 | Conferir `src/env/version.js`             | Compara o **valor** de `VERSION`, não os bytes (o arquivo está em LF no índice e o build o reescreve em CRLF) |
 | `npm run certs:teste` + `npm run test:ci` | Fecha a janela entre o último push na `main` e a criação da tag                                               |
 | `npm run build`                           | `lib/` e `dist/` são gitignored — sem isso o pacote sai vazio                                                 |
+| Conferir conteúdo do pacote               | Reprova se o tarball ganhar arquivo proibido ou perder arquivo essencial — ver abaixo                         |
 | `npm publish`                             | Sem `--provenance` e sem `--access public`: os dois já vêm de outro lugar                                     |
 
 Como o workflow refaz o build, `lib/` e `dist/` saem sempre do fonte daquela tag.
+
+### O guard de conteúdo do pacote
+
+Roda `npm pack --dry-run --json` **depois** do build — antes dele `lib/` e `dist/` não existem — e reprova o release em dois casos:
+
+- o tarball contém caminho proibido: `src/`, `test/`, `scripts/`, `certs/`, `.docs/`, `.github/`, `.vscode/`, `.claude/`, `CLAUDE.md`, `AGENTS.md`, `.prettierignore`, `package-lock.json`, `tsconfig.json`, `prettier.config.js`;
+- falta caminho essencial: `lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md`, `LICENSE`, `CHANGELOG.md`.
+
+A conferência é **por regra, não por snapshot** da lista de arquivos: `lib/` espelha `src/`, então uma lista congelada quebraria a cada arquivo novo do fonte e acabaria sendo atualizada no reflexo, sem ninguém ler o diff.
+
+Ele existe porque empacotamento errado é a falha que não dá sintoma: um tarball sem `lib/` é publicado sem erro em nenhum outro passo, e só aparece em quem instalar. Ver [ADR 0011](decisoes/0011-files-e-exports-como-contrato-de-empacotamento.md) e [build-e-versao.md](build-e-versao.md).
 
 ## Registro e credencial
 

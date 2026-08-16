@@ -22,7 +22,7 @@ Este arquivo é o resumo operacional. O detalhamento vive em `.docs/`, que não 
 
 Regra de fronteira: aqui ficam as regras que, ignoradas, quebram build/teste/release; em `.docs/arquitetura/` fica a explicação de como as coisas funcionam. Não duplicar — critério completo em [.docs/arquitetura/ESTRUTURA.md](.docs/arquitetura/ESTRUTURA.md).
 
-`.docs` está no `.npmignore` — não vai no pacote publicado —, mas **não** está no `.prettierignore`: o Markdown de lá passa pelo `format:check`. Rodar `npm run format` depois de mexer em doc.
+`.docs` não vai no pacote publicado (o `files` do `package.json` só lista `lib/`, `dist/` e `CHANGELOG.md`), mas **não** está no `.prettierignore`: o Markdown de lá passa pelo `format:check`. Rodar `npm run format` depois de mexer em doc.
 
 ## Comandos
 
@@ -57,7 +57,7 @@ Dois workflows em push e PR na `main`:
 
 Mais um em release publicado, descrito em [Release](#release):
 
-- `.github/workflows/publicar.yml` — confere tag e `version.js`, roda testes, build e `npm publish`.
+- `.github/workflows/publicar.yml` — confere tag e `version.js`, roda testes, build, confere o conteúdo do tarball e `npm publish`.
 
 Os três usam `npm ci` com `cache: npm` no `setup-node`. Ambos exigem `package-lock.json` versionado, e ele é — **não voltar a ignorá-lo**: sem lockfile, `npm ci` falha de imediato nos três workflows, e o pacote publicado passaria a ser montado com dependências resolvidas na hora do run, sem reprodutibilidade. Como consequência, bump de dependência agora é mudança de dois arquivos: `package.json` e `package-lock.json`, no mesmo commit.
 
@@ -118,7 +118,11 @@ O workflow refaz o build antes de publicar, então `lib/` e `dist/` saem sempre 
 
 `npm run release` (`git pull && npm run build && npm publish`) é o caminho manual, mantido para a publicação de bootstrap descrita abaixo. Fora dela, publicar da máquina fura o guard de tag e sai sem provenance.
 
-`.npmignore` exclui `src`, `scripts`, `test`, `.github`, `.vscode`, `.claude` e `certs` — o pacote publicado leva só `lib/`, `dist/` e a documentação. Diretório novo na raiz que não seja para o consumidor entra nessa lista; conferir com `npm pack --dry-run` antes do release.
+O que vai no pacote é decidido pelo campo **`files`** do `package.json` (`lib/`, `dist/`, `CHANGELOG.md` — mais `package.json`, `README.md` e `LICENSE`, que o npm inclui sempre). É uma allowlist: **silêncio significa exclusão**, então arquivo ou pasta nova na raiz fica fora por padrão, e publicar algo novo exige acrescentá-lo ao `files` de propósito. **Não reintroduzir `.npmignore`** — removido na 0.16.0, com `files` presente ele não decidiria nada e só criaria dúvida sobre qual dos dois manda.
+
+`exports` fecha a superfície pública na raiz: deep import (`@bitize/bit-mde/lib/...`) falha com `ERR_PACKAGE_PATH_NOT_EXPORTED`. A entrada `"./package.json"` é obrigatória, `types` tem de vir antes de `require`/`default`, e `main`/`types` continuam declarados para bundler antigo.
+
+O workflow confere o conteúdo do tarball depois do build e reprova o release se algo proibido entrar ou algo essencial sumir. Conferir localmente com `npm pack --dry-run`. Detalhes em [ADR 0011](.docs/arquitetura/decisoes/0011-files-e-exports-como-contrato-de-empacotamento.md).
 
 ### Registro e credencial
 

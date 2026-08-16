@@ -21,7 +21,7 @@ Com o fork vieram três workflows de CI e, principalmente, um workflow que **pub
 
 **`package-lock.json` versionado, e `npm ci` com `cache: npm` nos três workflows.**
 
-O lockfile fica fora do pacote publicado, via [.npmignore](../../../.npmignore) — ele serve ao build, não ao consumidor.
+O lockfile fica fora do pacote publicado, via `.npmignore` — ele serve ao build, não ao consumidor.
 
 ## Consequências
 
