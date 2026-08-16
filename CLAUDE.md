@@ -11,6 +11,19 @@ Biblioteca Node.js (CommonJS, JS puro com tipagem via JSDoc) que consome dois We
 
 Publicada no npm como `@bitize/bit-mde` (pacote escopado, `publishConfig.access: public`); o remote é `bitize/bit-mde` (fork de `lucashpmelo/node-mde`, publicado como `node-mde` até a 0.14.13). O `README.md` é a documentação pública da API e deve ser atualizado junto com mudanças de assinatura.
 
+## Documentação interna (`.docs/`)
+
+Este arquivo é o resumo operacional. O detalhamento vive em `.docs/`, que não vai no pacote publicado:
+
+- `.docs/arquitetura/` — como cada camada funciona ([camadas/](.docs/arquitetura/camadas/)), os fluxos de ponta a ponta ([fluxos/](.docs/arquitetura/fluxos/)) e o processo de [teste](.docs/arquitetura/testes-e-certificados.md), [build](.docs/arquitetura/build-e-versao.md) e [release](.docs/arquitetura/release.md).
+- `.docs/arquitetura/decisoes/` — ADRs numerados: o **porquê** das escolhas estruturais. Consultar antes de propor mudança que contrarie uma invariante.
+- `.docs/conhecimento/` — material externo da SEFAZ.
+- `.docs/tasks/` — tarefas versionadas, ciclo `drafts → specified → done | canceled`. Fluxo em [.docs/tasks/README.md](.docs/tasks/README.md), template em [.docs/tasks/\_templates/task-template.md](.docs/tasks/_templates/task-template.md). Para criar ou promover uma tarefa, usar a skill [criar-tarefa](.claude/skills/criar-tarefa/SKILL.md).
+
+Regra de fronteira: aqui ficam as regras que, ignoradas, quebram build/teste/release; em `.docs/arquitetura/` fica a explicação de como as coisas funcionam. Não duplicar — critério completo em [.docs/arquitetura/ESTRUTURA.md](.docs/arquitetura/ESTRUTURA.md).
+
+`.docs` está no `.npmignore` — não vai no pacote publicado —, mas **não** está no `.prettierignore`: o Markdown de lá passa pelo `format:check`. Rodar `npm run format` depois de mexer em doc.
+
 ## Comandos
 
 ```sh
@@ -105,7 +118,7 @@ O workflow refaz o build antes de publicar, então `lib/` e `dist/` saem sempre 
 
 `npm run release` (`git pull && npm run build && npm publish`) é o caminho manual, mantido para a publicação de bootstrap descrita abaixo. Fora dela, publicar da máquina fura o guard de tag e sai sem provenance.
 
-`.npmignore` exclui `src`, `scripts`, `test`, `.github`, `.vscode` e `certs` — o pacote publicado leva só `lib/`, `dist/` e a documentação.
+`.npmignore` exclui `src`, `scripts`, `test`, `.github`, `.vscode`, `.claude` e `certs` — o pacote publicado leva só `lib/`, `dist/` e a documentação. Diretório novo na raiz que não seja para o consumidor entra nessa lista; conferir com `npm pack --dry-run` antes do release.
 
 ### Registro e credencial
 
