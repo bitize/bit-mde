@@ -8,6 +8,8 @@
 - `exports` no `package.json`, fechando a superfície pública na raiz do pacote. `main` e `types` seguem declarados, para quem não entende `exports`
 - A CI de publicação passa a conferir o conteúdo do tarball antes do `npm publish`, reprovando o release se um arquivo proibido entrar ou um essencial sumir
 
+> **Primeira versão publicada pela CI**, com provenance. A 0.15.0 saiu de uma publicação manual, porque a configuração do trusted publisher no npm exige o pacote já publicado — a entrada daquela versão anuncia isso "a partir da 0.15.1", número que acabou não existindo.
+
 ### Modificado
 
 - `.npmignore` removido. O que vai no pacote passa a ser decidido só pelo `files`, que tem precedência sobre ele — manter os dois deixaria duas fontes de verdade para a mesma pergunta, com a de menor precedência dando a resposta errada. Ver [ADR 0011](https://github.com/bitize/bit-mde/blob/main/.docs/arquitetura/decisoes/0011-files-e-exports-como-contrato-de-empacotamento.md)
