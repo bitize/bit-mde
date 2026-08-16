@@ -1,20 +1,22 @@
-# Node MD-e
+# Bit MD-e
 
-[![npm version](https://img.shields.io/npm/v/node-mde.svg)](https://www.npmjs.com/package/node-mde)
-[![npm downloads](https://img.shields.io/npm/dt/node-mde.svg)](https://npm-stat.com/charts.html?package=node-mde)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/lucashpmelo/node-mde/blob/main/LICENSE)
-[![Package Quality](https://packagequality.com/shield/node-mde.svg)](https://packagequality.com/#?package=node-mde)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lucashpmelo_node-mde&metric=alert_status)](https://sonarcloud.io/dashboard?id=lucashpmelo_node-mde)
-[![Known Vulnerabilities](https://snyk.io/test/npm/node-mde/badge.svg)](https://snyk.io/test/npm/node-mde)
+[![npm version](https://img.shields.io/npm/v/@bitize/bit-mde.svg)](https://www.npmjs.com/package/@bitize/bit-mde)
+[![npm downloads](https://img.shields.io/npm/dt/@bitize/bit-mde.svg)](https://npm-stat.com/charts.html?package=@bitize/bit-mde)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/bitize/bit-mde/blob/main/LICENSE)
+[![Mantido pelo BitERP](https://img.shields.io/badge/mantido%20por-BitERP-0b5fff.svg)](https://www.biterp.ai)
 
 Biblioteca para consumo dos Web Services da Sefaz de Distribuição de DF-e e Evento de Manifestação do Destinatário.
 
 Essa biblioteca permite consultar a relação das notas fiscais emitidas contra um determinado CNPJ/CPF e realizar o envio do evento de manifestação, podendo assim, baixar o XML da NF-e.
 
+Desenvolvida e mantida pela equipe do **[BitERP](https://www.biterp.ai)**, onde é usada em produção para a automação da manifestação do destinatário e do download de XML de NF-e de entrada.
+
+> Este projeto é um fork de [node-mde](https://github.com/lucashpmelo/node-mde), criado por [Lucas Melo](https://github.com/lucashpmelo), mantido pela [Bitize](https://www.biterp.ai) e publicado no npm como `@bitize/bit-mde`. A API pública permanece a mesma — apenas o nome do pacote muda.
+
 ## Instalação
 
 ```sh
-$ npm i node-mde
+$ npm i @bitize/bit-mde
 ```
 
 ## Pré-Requisitos
@@ -63,7 +65,7 @@ new DistribuicaoDFe(config)
 #### Exemplo
 
 ```js
-const { DistribuicaoDFe } = require('node-mde')
+const { DistribuicaoDFe } = require('@bitize/bit-mde')
 const fs = require('fs')
 
 const distribuicao = new DistribuicaoDFe({
@@ -120,7 +122,7 @@ console.log(consulta)
 #### Exemplo
 
 ```js
-const { DistribuicaoDFe } = require('node-mde')
+const { DistribuicaoDFe } = require('@bitize/bit-mde')
 const fs = require('fs')
 
 const distribuicao = new DistribuicaoDFe({
@@ -173,7 +175,7 @@ console.log(consulta)
 #### Exemplo
 
 ```js
-const { DistribuicaoDFe } = require('node-mde')
+const { DistribuicaoDFe } = require('@bitize/bit-mde')
 const fs = require('fs')
 
 const distribuicao = new DistribuicaoDFe({
@@ -249,7 +251,7 @@ new RecepcaoEvento(config)
 #### Exemplo
 
 ```js
-const { RecepcaoEvento } = require('node-mde')
+const { RecepcaoEvento } = require('@bitize/bit-mde')
 const fs = require('fs')
 
 const recepcao = new RecepcaoEvento({
@@ -325,6 +327,18 @@ console.log(manifestacao)
 //   status: 200,
 // }
 ```
+
+## Sobre o BitERP
+
+O `@bitize/bit-mde` é mantido pela equipe do **[BitERP](https://www.biterp.ai)**, um ERP online que automatiza a rotina fiscal, financeira e comercial de empresas brasileiras.
+
+Dentro do BitERP, esta biblioteca é o componente responsável por:
+
+- monitorar os documentos fiscais destinados ao CNPJ/CPF do cliente (Distribuição de DF-e);
+- registrar a manifestação do destinatário (Ciência, Confirmação, Desconhecimento ou Operação não Realizada);
+- baixar e armazenar o XML das NF-e de entrada.
+
+Se você precisa disso pronto — sem manter certificado, agendamento de consulta por NSU e conciliação de notas de entrada na mão — conheça o BitERP em **[www.biterp.ai](https://www.biterp.ai)**.
 
 ## Tabelas
 

@@ -1,5 +1,5 @@
 {
-  "name": "node-mde",
+  "name": "@bitize/bit-mde",
   "version": "0.14.13",
   "description": "Biblioteca para consultar notas destinadas e enviar evento de manifestação do destinatário",
   "main": "./lib/index.js",
@@ -9,11 +9,16 @@
     "script": "node ./scripts/index.js",
     "release": "git pull && npm publish",
     "test": "mocha",
+    "test:ci": "mocha --ignore test/sefaz.test.js",
+    "certs:teste": "sh ./scripts/gerar-certificado-teste.sh",
     "types": "npx tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucashpmelo/node-mde.git"
+    "url": "git+https://github.com/bitize/bit-mde.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "nfe",
@@ -30,12 +35,15 @@
     "manifestacaonfe",
     "distribuicaodfe"
   ],
-  "author": "Lucas Melo <lucashpmelo94@gmail.com>",
+  "author": "Bitize",
+  "contributors": [
+    "Lucas Melo <lucashpmelo94@gmail.com> (autor original do node-mde)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lucashpmelo/node-mde/issues"
+    "url": "https://github.com/bitize/bit-mde/issues"
   },
-  "homepage": "https://github.com/lucashpmelo/node-mde#readme",
+  "homepage": "https://github.com/bitize/bit-mde#readme",
   "dependencies": {
     "axios": "1.19.0",
     "fast-xml-parser": "5.11.0",
@@ -44,12 +52,15 @@
     "xml-crypto": "6.1.2"
   },
   "devDependencies": {
-    "@types/luxon": "^3.4.2",
-    "@types/node": "^22.13.10",
-    "@types/node-forge": "^1.3.11",
-    "@types/xml-crypto": "^1.4.6",
-    "mocha": "^10.8.2",
-    "typescript": "^5.8.2",
+    "@types/luxon": "^3.7.4",
+    "@types/node": "^26.2.0",
+    "@types/node-forge": "^1.3.14",
+    "mocha": "^11.8.0",
+    "typescript": "^5.9.3",
     "uglify-js": "^3.19.3"
+  },
+  "overrides": {
+    "diff": "^9.0.0",
+    "serialize-javascript": "^7.1.0"
   }
 }

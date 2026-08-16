@@ -25,7 +25,7 @@ class Instance {
       {
         baseURL: baseURL,
         headers: {
-          'User-Agent': `node-mde/${VERSION}`,
+          'User-Agent': `bit-mde/${VERSION}`,
           'Content-Type': 'application/soap+xml; charset=utf-8',
         },
         httpsAgent: httpsAgent,

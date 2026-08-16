@@ -9,12 +9,14 @@ Biblioteca Node.js (CommonJS, JS puro com tipagem via JSDoc) que consome dois We
 - **NFeDistribuicaoDFe** — consulta de documentos destinados a um CNPJ/CPF (por `ultNSU`, `NSU` ou `chNFe`).
 - **NFeRecepcaoEvento4** — envio de lote de eventos de manifestação do destinatário.
 
-Publicada no npm como `node-mde`; o remote é `bitize/bit-mde` (fork de `lucashpmelo/node-mde`). O `README.md` é a documentação pública da API e deve ser atualizado junto com mudanças de assinatura.
+Publicada no npm como `@bitize/bit-mde` (pacote escopado, `publishConfig.access: public`); o remote é `bitize/bit-mde` (fork de `lucashpmelo/node-mde`, publicado como `node-mde` até a 0.14.13). O `README.md` é a documentação pública da API e deve ser atualizado junto com mudanças de assinatura.
 
 ## Comandos
 
 ```sh
 npm test                        # mocha sobre ./test (exige ./certs — ver abaixo)
+npm run test:ci                 # tudo menos sefaz.test.js (o que a CI roda)
+npm run certs:teste             # gera ./certs autoassinado descartável
 npx mocha test/xml.test.js      # um arquivo de teste
 npx mocha --grep "Imutabilidade"  # filtra por nome do teste
 npm run build                   # npm run script && npm run types
@@ -29,13 +31,19 @@ Todo arquivo de teste que toca certificado faz `fs.readFileSync` **no topo do m�
 
 Sem `certs/`, ainda é possível rodar isoladamente: `test/xml.test.js`, `test/gzip.test.js`, `test/zeroPad.test.js`, `test/data.test.js`.
 
-`test/sefaz.test.js` é um teste de integração real: bate nos endpoints de produção **e** homologação da SEFAZ com mTLS, e falha sem rede ou com certificado vencido.
+Quem não tem um A1 em mãos pode rodar `npm run certs:teste`, que gera um autoassinado descartável e libera tudo menos `sefaz.test.js` (65 dos 67 testes). O script **aborta se `certs/` já existir**, para não sobrescrever um certificado real. Dois detalhes do `scripts/gerar-certificado-teste.sh` são load-bearing e não devem ser "simplificados": o `.pfx` precisa ser gerado com `-keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES` porque o node-forge não decifra o padrão AES-256 do OpenSSL 3; e os `.pem` são normalizados para CRLF porque `certificado.test.js` compara byte a byte com a saída do forge, que usa CRLF, enquanto o OpenSSL escreve LF no Linux.
+
+`test/sefaz.test.js` é um teste de integração real: bate nos endpoints de produção **e** homologação da SEFAZ com mTLS, e falha sem rede ou com certificado vencido. É o único arquivo excluído da CI.
+
+### CI
+
+`.github/workflows/ci.yml` roda em push e PR na `main`, com matriz Node 20/22/24: `npm install` → `npm run certs:teste` → `npm run test:ci` → `npm run build`. Usa `npm install` em vez de `npm ci`, e não habilita `cache: npm`, porque `package-lock.json` é gitignored — os dois exigem o lockfile versionado.
 
 ### Build e versão
 
 `scripts/index.js` faz três coisas, nessa ordem: reescreve `src/env/version.js` com a `version` do `package.json`, limpa `./lib` e `./dist`, e copia cada arquivo de `src/` passando por `UglifyJS.minify({output:{beautify:true}})` para `./lib`. O `main` do pacote é `./lib/index.js` e os tipos vêm de `./dist/index.d.ts`, gerado pelo `tsc` (`allowJs` + `emitDeclarationOnly`, entrando só por `src/index.js`).
 
-`lib/` e `dist/` são gitignored — **rodar `npm run build` antes de publicar**. Bumpar a versão no `package.json` sozinho não basta: `src/env/version.js` é commitado e alimenta o header `User-Agent: node-mde/<version>`; ele só é atualizado pelo build.
+`lib/` e `dist/` são gitignored — **rodar `npm run build` antes de publicar**. Bumpar a versão no `package.json` sozinho não basta: `src/env/version.js` é commitado e alimenta o header `User-Agent: bit-mde/<version>`; ele só é atualizado pelo build.
 
 ## Arquitetura
 
@@ -78,3 +86,7 @@ env/           constantes: endpoints por tpAmb, cadeia CA ICP-Brasil, EVENTOS, C
 4. Commit `release x.y.z` e `npm run release`.
 
 `.npmignore` exclui `src`, `scripts`, `test`, `.github`, `.vscode` e `certs` — o pacote publicado leva só `lib/`, `dist/` e a documentação.
+
+### Registro
+
+Publicado no **npmjs.com** como pacote escopado público, sob a org `bitize`. `publishConfig.access: "public"` é obrigatório e não pode ser removido: pacote escopado nasce `restricted`, e sem essa flag o `npm publish` falha exigindo plano pago. Publicar públicos no npm é gratuito; só pacote privado é cobrado.

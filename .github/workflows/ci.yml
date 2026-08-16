@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Testes (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20.x', '22.x', '24.x']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # npm install, e não npm ci: package-lock.json é gitignored neste repo.
+      # Se o lockfile passar a ser versionado, trocar por `npm ci` e habilitar
+      # `cache: npm` no passo acima — ambos exigem o lockfile no repositório.
+      - run: npm install
+
+      # A suíte lê certs/ no topo de cada módulo de teste. Um certificado
+      # autoassinado descartável basta para tudo, menos sefaz.test.js.
+      - name: Gerar certificado de teste
+        run: npm run certs:teste
+
+      # Exclui sefaz.test.js: é teste de integração real contra os endpoints de
+      # produção e homologação da SEFAZ, e exige certificado ICP-Brasil válido.
+      - name: Rodar testes
+        run: npm run test:ci
+
+      # Garante que lib/ e dist/ ainda são geráveis — o pacote não é publicável sem isso.
+      - name: Build
+        run: npm run build

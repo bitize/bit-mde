@@ -2,7 +2,7 @@
 
 ## Relatar um erro / Solicitar novo recurso
 
-Caso ache algum problema na biblioteca, ou identifique que falta implementar algo, [abra uma nova issue](https://github.com/lucashpmelo/node-mde/issues/new/choose).
+Caso ache algum problema na biblioteca, ou identifique que falta implementar algo, [abra uma nova issue](https://github.com/bitize/bit-mde/issues/new/choose).
 
 ## Pull requests
 
@@ -19,5 +19,5 @@ Caso ache algum problema na biblioteca, ou identifique que falta implementar alg
   - ```js
     git push origin sua-nova-branch
     ```
-- Crie uma [solicitação pull](https://github.com/lucashpmelo/node-mde/compare) para sua branch.
-- [Abra uma issue](https://github.com/lucashpmelo/node-mde/issues/new) referenciando sua solicitação pull e detalhando as alterações.
+- Crie uma [solicitação pull](https://github.com/bitize/bit-mde/compare) para sua branch.
+- [Abra uma issue](https://github.com/bitize/bit-mde/issues/new) referenciando sua solicitação pull e detalhando as alterações.
