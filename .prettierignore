@@ -5,4 +5,5 @@ dist
 # Certificados (gitignored, mas podem existir localmente).
 certs
 
+# Gerado pelo npm; reformatar brigaria com o próprio npm a cada install.
 package-lock.json

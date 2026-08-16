@@ -24,9 +24,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
+          cache: npm
 
-      # npm install, e não npm ci: package-lock.json é gitignored neste repo.
-      - run: npm install
+      - run: npm ci
 
       - name: Verificar formatação
         run: npm run format:check
@@ -43,8 +43,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
+          cache: npm
 
-      - run: npm install
+      - run: npm ci
 
       # Garante que lib/ (UglifyJS) e dist/ (tsc) ainda são geráveis — o pacote
       # não é publicável sem isso, e ambos são gitignored.

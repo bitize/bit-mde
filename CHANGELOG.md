@@ -5,6 +5,7 @@
 - Projeto passa a ser mantido pela Bitize em [bitize/bit-mde](https://github.com/bitize/bit-mde), como fork de [lucashpmelo/node-mde](https://github.com/lucashpmelo/node-mde)
 - Pacote renomeado de `node-mde` para `@bitize/bit-mde` — atualize a instalação e os `require`/`import`. A API pública permanece inalterada
 - `README.md` passa a referenciar o [BitERP](https://www.biterp.ai), produto que mantém e utiliza a biblioteca
+- Pacote passa a ser publicado pela CI, com provenance: cada versão no npm fica vinculada de forma verificável ao commit e ao workflow que a produziu
 
 ### Segurança
 

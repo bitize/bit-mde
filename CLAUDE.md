@@ -37,14 +37,20 @@ Quem não tem um A1 em mãos pode rodar `npm run certs:teste`, que gera um autoa
 
 ### CI
 
-Dois workflows, ambos em push e PR na `main`:
+Dois workflows em push e PR na `main`:
 
-- `.github/workflows/testes.yml` — matriz Node 20/22/24: `npm install` → `npm run certs:teste` → `npm run test:ci`.
+- `.github/workflows/testes.yml` — matriz Node 20/22/24: `npm ci` → `npm run certs:teste` → `npm run test:ci`.
 - `.github/workflows/qualidade.yml` — dois jobs paralelos em Node 22: `npm run format:check` (Prettier) e `npm run build`.
 
-Ambos usam `npm install` em vez de `npm ci` e não habilitam `cache: npm`, porque `package-lock.json` é gitignored — os dois exigem o lockfile versionado.
+Mais um em release publicado, descrito em [Release](#release):
 
-`prettier.config.js` fixa `endOfLine: 'auto'` e isso é obrigatório enquanto não houver `.gitattributes`: com `core.autocrlf=true` no Windows o working tree fica em CRLF, enquanto a CI em Linux vê LF. Com o padrão `'lf'` do Prettier, `format:check` acusaria todos os arquivos na máquina dos devs e nenhum na CI. O Prettier é dependência de dev fixada em versão exata (sem `^`) — sem lockfile versionado, um range deixaria a CI instalar um minor novo e reprovar `format:check` em arquivos intocados. Pelo mesmo motivo, não trocar por `npx prettier` solto, que baixaria uma versão diferente a cada run.
+- `.github/workflows/publicar.yml` — confere tag e `version.js`, roda testes, build e `npm publish`.
+
+Os três usam `npm ci` com `cache: npm` no `setup-node`. Ambos exigem `package-lock.json` versionado, e ele é — **não voltar a ignorá-lo**: sem lockfile, `npm ci` falha de imediato nos três workflows, e o pacote publicado passaria a ser montado com dependências resolvidas na hora do run, sem reprodutibilidade. Como consequência, bump de dependência agora é mudança de dois arquivos: `package.json` e `package-lock.json`, no mesmo commit.
+
+Nenhum job escreve no repositório: todos declaram `permissions: contents: read` e `persist-credentials: false` no checkout, para o `GITHUB_TOKEN` não ficar gravado no `.git/config` do runner. `publicar.yml` é o único que soma `id-token: write`, pelo OIDC.
+
+`prettier.config.js` fixa `endOfLine: 'auto'` e isso é obrigatório enquanto não houver `.gitattributes`: com `core.autocrlf=true` no Windows o working tree fica em CRLF, enquanto a CI em Linux vê LF. Com o padrão `'lf'` do Prettier, `format:check` acusaria todos os arquivos na máquina dos devs e nenhum na CI. O Prettier é dependência de dev fixada em versão exata (sem `^`). Com o lockfile versionado isso virou redundância proposital — o `npm ci` já instalaria a mesma versão —, mas o pin mantém a intenção visível no `package.json` e impede que um `npm update` suba um minor e reprove `format:check` em arquivos intocados. Pelo mesmo motivo, não trocar por `npx prettier` solto, que baixaria uma versão diferente a cada run.
 
 ### Build e versão
 
@@ -87,13 +93,24 @@ env/           constantes: endpoints por tpAmb, cadeia CA ICP-Brasil, EVENTOS, C
 
 ## Release
 
+A publicação é feita pela CI, em `.github/workflows/publicar.yml`, disparada quando um **release é publicado no GitHub** — não em push na `main`.
+
 1. Mover as mudanças de `[Não publicado]` para uma seção versionada e datada no `CHANGELOG.md` (formato `## [x.y.z] / AAAA-MM-DD`, com subseção `### Segurança` quando for só bump de dependências).
 2. Bumpar `version` no `package.json`.
-3. `npm run build` (regenera `src/env/version.js`).
-4. Commit `release x.y.z` e `npm run release`.
+3. `npm run build` (regenera `src/env/version.js`, que é commitado).
+4. Commit `release x.y.z` e push na `main`.
+5. Criar o release no GitHub com a tag `vx.y.z`. O `v` é obrigatório: o workflow compara a tag com o `package.json` e aborta se divergirem, porque versão publicada no npm não se reescreve.
+
+O workflow refaz o build antes de publicar, então `lib/` e `dist/` saem sempre do fonte daquela tag. O passo 3 continua necessário mesmo assim, porque `src/env/version.js` é commitado e alimenta o header `User-Agent: bit-mde/<version>` — há um guard que reprova o release se ele estiver defasado. O guard compara o **valor** de `VERSION`, e não os bytes do arquivo: ele está em LF no índice e o build o reescreve em CRLF, então um `git diff` acusaria diferença em toda execução.
+
+`npm run release` (`git pull && npm run build && npm publish`) é o caminho manual, mantido para a publicação de bootstrap descrita abaixo. Fora dela, publicar da máquina fura o guard de tag e sai sem provenance.
 
 `.npmignore` exclui `src`, `scripts`, `test`, `.github`, `.vscode` e `certs` — o pacote publicado leva só `lib/`, `dist/` e a documentação.
 
-### Registro
+### Registro e credencial
 
 Publicado no **npmjs.com** como pacote escopado público, sob a org `bitize`. `publishConfig.access: "public"` é obrigatório e não pode ser removido: pacote escopado nasce `restricted`, e sem essa flag o `npm publish` falha exigindo plano pago. Publicar públicos no npm é gratuito; só pacote privado é cobrado.
+
+A autenticação é por **Trusted Publishing (OIDC)**, sem `NPM_TOKEN` guardado como secret: o npm troca o token de identidade emitido pelo GitHub por uma credencial de curta duração. Por isso o workflow declara `permissions: id-token: write` — tirar essa linha quebra a publicação por falta de credencial. O efeito colateral desejável é o **provenance**, gerado automaticamente (dispensa `--provenance`), que vira selo verificado na página do pacote. Exige `npm >= 11.5.1`, posterior ao npm que acompanha o Node 22, daí o passo que atualiza o npm antes de tudo.
+
+O trusted publisher é configurado na página do pacote no npmjs.com (Settings → Trusted Publisher → GitHub Actions), apontando `bitize/bit-mde` e o arquivo `publicar.yml`. Renomear esse arquivo invalida a configuração do lado do npm. Como a tela só existe para pacote já publicado, a **primeira** publicação de `@bitize/bit-mde` precisa sair de uma máquina, com `npm run release`; da segunda em diante é sempre a CI.

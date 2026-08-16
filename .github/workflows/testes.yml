@@ -29,11 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
 
-      # npm install, e não npm ci: package-lock.json é gitignored neste repo.
-      # Se o lockfile passar a ser versionado, trocar por `npm ci` e habilitar
-      # `cache: npm` no passo acima — ambos exigem o lockfile no repositório.
-      - run: npm install
+      - run: npm ci
 
       # A suíte lê certs/ no topo de cada módulo de teste. Um certificado
       # autoassinado descartável basta para tudo, menos sefaz.test.js.
