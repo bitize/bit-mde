@@ -124,7 +124,7 @@ A ordem das condições importa — `types` **antes** de `require` e `default`, 
 }
 ```
 
-- `package.json`, `README.md` e `LICENSE` entram sempre, independente do `files` — não precisam ser listados. `CHANGELOG.md` é listado explicitamente para não depender de comportamento herdado de versões antigas do npm.
+- `package.json`, `README.md` e `LICENSE` entram sempre, independente do `files` — não precisam ser listados. `CHANGELOG.md` **precisa**: o npm não o inclui automaticamente, então a entrada no `files` é o único motivo de ele estar no pacote.
 - `.npmignore` **removido**.
 - `main` (`./lib/index.js`) e `types` (`./dist/index.d.ts`) ficam como estão.
 - Nada em `src/` muda. `src/env/version.js` é reescrito pelo build por causa do bump, não por causa desta tarefa.
@@ -180,10 +180,15 @@ Verificado também, no tarball instalado: `import` de ESM (default e nomeados) e
 ## Notas de implementação
 
 - **Dois arquivos fora do checklist precisaram entrar.** `.docs/README.md` tinha link vivo para `../.npmignore`, que a remoção matou. Corrigido para apontar o `files` do `package.json`. A especificação só previa `CLAUDE.md`, `build-e-versao.md` e `release.md`.
-- **O link morto do [ADR 0003](../../arquitetura/decisoes/0003-lockfile-versionado.md) foi deixado como está**, de propósito. Ele aponta para `../../../.npmignore` na frase que explica como o lockfile fica fora do pacote. Editar ADR aceito é contra a regra de [decisoes/README.md](../../arquitetura/decisoes/README.md), e a mudança de mecanismo está registrada no ADR 0011. Fica como ponto para o revisor decidir: aceitar o link morto ou abrir exceção para desfazer só o hyperlink, sem tocar no texto.
+- **Link morto no [ADR 0003](../../arquitetura/decisoes/0003-lockfile-versionado.md), resolvido em review.** A remoção do `.npmignore` matou o hyperlink da frase que explica como o lockfile fica fora do pacote. Levantei como ponto em aberto, porque editar ADR aceito é contra a regra de [decisoes/README.md](../../arquitetura/decisoes/README.md); o review decidiu desfazer só o hyperlink. `.npmignore` virou código inline no mesmo lugar — palavras idênticas, texto e decisão intactos. O ADR 0011 registra que aquela referência agora é histórica.
 - **ADR numerado 0011, não 0010**, porque a [GH-3](GH-3-suporte-a-cte-e-mdfe-na-distribuicao.md) já reserva o 0010 em texto commitado. A tabela de [decisoes/README.md](../../arquitetura/decisoes/README.md) ganhou nota explicando o salto.
 - **Guard da CI: o caminho do JSON vai por variável de ambiente, não por argumento.** A primeira versão lia `process.argv[1]`, que num script vindo do stdin (`node - arquivo`) vale `'-'` e não o argumento — o arquivo fica em `process.argv[2]`. Trocado por `process.env.PACOTE_JSON`, que não depende dessa sutileza.
-- **`CHANGELOG.md` faltava na lista de essenciais do guard**, apontado em review do PR. A primeira versão só exigia `lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md` e `LICENSE` — mas destes o npm inclui sozinho todos menos o `CHANGELOG.md`, que só entra no pacote por estar no `files`. Confirmado empacotando com `files` reduzido a `lib/` e `dist/`: o tarball sai sem ele. Sem a correção, alguém tirar o `CHANGELOG.md` do `files` passaria pelo guard.
+- **`CHANGELOG.md` faltava na lista de essenciais do guard**, apontado em review do PR.
+
+  A primeira versão exigia cinco caminhos: `lib/index.js`, `dist/index.d.ts`, `package.json`, `README.md` e `LICENSE`. Todos os cinco chegam ao pacote sem depender de o `files` os nomear — `package.json`, `README.md` e `LICENSE` porque o npm sempre os inclui, `lib/` e `dist/` porque a entrada do `files` que os cobre é a mesma que faz o pacote ter código. Nenhum deles isolava a falha de alguém mexer no `files`.
+
+  O guard atual exige seis, com `CHANGELOG.md` acrescentado. Ele é o único caso em que a entrada no `files` é o **único** motivo de o arquivo estar no pacote: o npm não o inclui automaticamente. Confirmado empacotando com `files` reduzido a `["lib/", "dist/"]` — o tarball sai com `LICENSE`, `README.md` e `package.json`, sem o `CHANGELOG.md`. Sem essa entrada na lista, tirar o `CHANGELOG.md` do `files` seria uma regressão que passaria pelo guard.
+
 - Sem outros desvios. Nenhum arquivo de `src/` foi editado à mão: `src/env/version.js` mudou só pelo build, por causa do bump.
 
 ## Conclusão e entrega
