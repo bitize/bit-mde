@@ -66,22 +66,52 @@ Se a decisão tem alternativa real e reversão custosa, ela merece ADR próprio 
 
 ## Passo 4 — Promover para `specified/`
 
-Só depois de a especificação estar aceita. Nesta ordem:
+Só depois de a especificação estar aceita.
 
-1. **Criar a issue** — o corpo é um resumo (até ~300 palavras), nunca a especificação inteira:
+Há um ovo-e-galinha aqui: o corpo da issue precisa apontar para o caminho final do arquivo, mas esse caminho depende do número que só existe depois de a issue ser criada. Por isso a issue nasce com corpo provisório e o corpo definitivo é escrito por último. Nesta ordem:
 
-   ```bash
-   gh issue create --title "<título da tarefa>" --body-file <(…)
-   ```
-
-2. **Mover com `git mv`**, usando o número retornado:
+1. **Criar a issue** e guardar o número:
 
    ```bash
-   git mv .docs/tasks/drafts/descricao-curta.md .docs/tasks/specified/GH-NN-descricao-curta.md
+   NN=$(gh issue create --title "<título da tarefa>" \
+     --body "Resumo em edição." | grep -oE '[0-9]+$')
    ```
 
-3. **Preencher o cabeçalho** — campo **Issue**, **Status** `specified`, **Atualizado em**.
-4. **Conferir o blockquote final da issue** — precisa apontar para o caminho real, agora em `specified/`. Ele volta a mudar quando a tarefa for para `done/` ou `canceled/`.
+   Tarefa vinda de issue já aberta por terceiro (exceção do Passo 1) pula esta etapa — basta `NN=<número da issue>`.
+
+2. **Mover com `git mv`**, do nome criado no Passo 1 para o nome com prefixo:
+
+   ```bash
+   git mv .docs/tasks/drafts/descricao-curta.md \
+     .docs/tasks/specified/GH-$NN-descricao-curta.md
+   ```
+
+   Se o arquivo já nasceu prefixado, a origem é `.docs/tasks/drafts/GH-$NN-descricao-curta.md` — o `git mv` só troca o diretório.
+
+3. **Preencher o cabeçalho** — título `# GH-NN: …` com o número real, campo **Issue**, **Status** `specified`, **Atualizado em**. Título, campo **Issue** e nome do arquivo precisam concordar no mesmo `NN`.
+4. **Escrever o corpo da issue** — resumo de até ~300 palavras, nunca a especificação inteira, no formato de [Integração com o GitHub](../../../.docs/tasks/README.md).
+
+O comando do passo 4, com o `EOF` na coluna 0 (indentar o terminador impede o heredoc de fechar):
+
+```bash
+gh issue edit "$NN" --body "$(cat <<EOF
+## Resumo
+
+<2 a 4 frases sobre objetivo e escopo>
+
+## Pontos principais
+
+- <ponto 1>
+- <ponto 2>
+
+---
+
+> **Especificação completa:** \`.docs/tasks/specified/GH-$NN-descricao-curta.md\`
+EOF
+)"
+```
+
+O blockquote é obrigatório e **envelhece a cada `git mv`**: repetir esse `gh issue edit` sempre que a tarefa mudar de diretório, trocando `specified/` por `done/` ou `canceled/`.
 
 > **O repositório é público.** Nada de certificado, CNPJ de cliente, chave de NF-e real ou XML de produção na issue. Anonimizar quando for necessário ao diagnóstico — inclusive `cStat`/`xMotivo` colados de rejeição real.
 

@@ -87,15 +87,16 @@ git mv .docs/tasks/specified/GH-12-descricao-curta.md .docs/tasks/canceled/GH-12
 
 Cada tarefa em `specified/`, `done/` e `canceled/` tem uma issue correspondente. Ao mover de `drafts/` para `specified/`:
 
-1. Criar a issue:
+1. Criar a issue com corpo provisório e guardar o número — o corpo definitivo depende do caminho final do arquivo, que depende do número:
 
    ```bash
-   gh issue create --title "<título da tarefa>" --body-file <(…)
+   NN=$(gh issue create --title "<título da tarefa>" \
+     --body "Resumo em edição." | grep -oE '[0-9]+$')
    ```
 
 2. Renomear e mover o arquivo usando o número retornado;
-3. Preencher o campo **Issue** no cabeçalho;
-4. Atualizar o corpo da issue com um **resumo curto** (não a especificação inteira):
+3. Preencher o campo **Issue** e o título `# GH-NN: …` no cabeçalho, com o mesmo número do nome do arquivo;
+4. Atualizar o corpo da issue com um **resumo curto** (não a especificação inteira), via `gh issue edit "$NN" --body …`:
 
    ```markdown
    ## Resumo
