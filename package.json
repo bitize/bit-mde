@@ -1,9 +1,22 @@
 {
   "name": "@bitize/bit-mde",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Biblioteca para consultar notas destinadas e enviar evento de manifestação do destinatário",
   "main": "./lib/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/",
+    "dist/",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "npm run script && npm run types",
     "script": "node ./scripts/index.js",

@@ -73,6 +73,71 @@ jobs:
       - name: Build
         run: npm run build
 
+      # O que vai no pacote é decidido pelo `files` do package.json. Este guard
+      # existe para o erro não passar silencioso: um tarball errado é publicado
+      # sem falhar em nenhum outro passo, e versão no npm não se reescreve.
+      #
+      # A conferência é por regra, não por snapshot da lista: lib/ espelha src/,
+      # então uma lista congelada quebraria a cada arquivo novo e acabaria sendo
+      # atualizada no reflexo, sem ninguém ler o diff. Precisa rodar DEPOIS do
+      # build — antes dele lib/ e dist/ não existem e não haveria o que listar.
+      - name: Conferir conteúdo do pacote
+        env:
+          PACOTE_JSON: ${{ runner.temp }}/pacote.json
+        run: |
+          npm pack --dry-run --json > "$PACOTE_JSON"
+          node - <<'JS'
+          const { readFileSync } = require('node:fs')
+
+          const [{ files }] = JSON.parse(readFileSync(process.env.PACOTE_JSON, 'utf8'))
+          const caminhos = files.map((f) => f.path)
+
+          // Diretório termina em barra e casa por prefixo; o resto é nome exato.
+          const proibidos = [
+            'src/',
+            'test/',
+            'scripts/',
+            'certs/',
+            '.docs/',
+            '.github/',
+            '.vscode/',
+            '.claude/',
+            'CLAUDE.md',
+            'AGENTS.md',
+            '.prettierignore',
+            'package-lock.json',
+            'tsconfig.json',
+            'prettier.config.js',
+          ]
+          const essenciais = [
+            'lib/index.js',
+            'dist/index.d.ts',
+            'package.json',
+            'README.md',
+            'LICENSE',
+          ]
+
+          const vazando = caminhos.filter((p) =>
+            proibidos.some((q) => (q.endsWith('/') ? p.startsWith(q) : p === q))
+          )
+          const faltando = essenciais.filter((p) => !caminhos.includes(p))
+
+          if (vazando.length) {
+            console.error('Arquivos que não deveriam ser publicados:')
+            vazando.forEach((p) => console.error('  ' + p))
+          }
+          if (faltando.length) {
+            console.error('Arquivos essenciais ausentes do pacote:')
+            faltando.forEach((p) => console.error('  ' + p))
+          }
+          if (vazando.length || faltando.length) {
+            console.error('\nConfira o campo `files` do package.json.')
+            process.exit(1)
+          }
+
+          console.log(`Pacote com ${caminhos.length} arquivos, dentro do esperado.`)
+          JS
+
       # Sem --provenance: com trusted publishing o npm gera a atestação sozinho.
       # Sem --access public: já está em publishConfig.access no package.json.
       - name: Publicar no npm
