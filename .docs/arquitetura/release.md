@@ -66,7 +66,7 @@ O trusted publisher é configurado na página do pacote no npmjs.com (Settings �
 
 ### A publicação de bootstrap
 
-A tela de trusted publisher só existe para pacote **já publicado**. Por isso a primeira publicação de `@bitize/bit-mde` (0.15.0) saiu de uma máquina, com `npm run release` (`git pull && npm run build && npm publish`). Da 0.15.1 em diante é sempre a CI.
+A tela de trusted publisher só existe para pacote **já publicado**. Por isso a primeira publicação de `@bitize/bit-mde` (0.15.0) saiu de uma máquina, com `npm run release` (`git pull && npm run build && npm publish`). **Da segunda publicação em diante é sempre a CI** — na prática, a 0.16.0.
 
 `npm run release` fica mantido para esse caso e para emergência. Fora dele, publicar da máquina **fura o guard de tag e sai sem provenance** — não fazer.
 
