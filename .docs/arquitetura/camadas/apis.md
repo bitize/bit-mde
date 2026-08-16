@@ -58,7 +58,7 @@ this.config = Object.freeze({
 Object.freeze(this)
 ```
 
-O congelamento é em dois níveis — `config` e os dois objetos de options dentro dele. Quem recebe esses objetos pode lê-los e mesclá-los, mas **não pode escrever neles**; ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
+O congelamento alcança dois níveis — `config` e os dois objetos de options dentro dele —, mas `Object.freeze` é **raso**: só as propriedades de primeiro nível de cada um desses três objetos ficam imutáveis. O que estiver aninhado mais fundo, como `requestOptions.headers`, continua mutável. Quem recebe esses objetos pode lê-los e mesclá-los, mas **não pode escrever nas propriedades congeladas**; ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
 
 ## Métodos públicos
 

@@ -2,20 +2,20 @@
 
 ## Controllers — a sequência fixa
 
-[src/controllers/](../../../src/controllers/) tem duas classes, cada uma com um único método estático `enviar(opts)`, e as duas têm o mesmo corpo:
+[src/controllers/](../../../src/controllers/) tem duas classes, cada uma com um único método estático `enviar(opts)`, e as duas têm praticamente o mesmo corpo:
 
 ```js
 static async enviar(opts) {
   const data = XHelper.montarRequest(opts)
   const retornoSefaz = await XHelper.enviarConsulta(data, opts) // .enviarEvento na recepção
-  const json = XHelper.montarResponse(retornoSefaz.data)
+  const json = await XHelper.montarResponse(retornoSefaz.data)
   return RetornoHelper.montarRetorno({ json, data, retornoSefaz })
 }
 ```
 
 O controller não decide nada: ele fixa a ordem e o formato do retorno. Toda variação entre os dois serviços está no helper. Se um passo novo aparecer (retry, cache, log), é aqui que ele entraria — e isso mudaria o contrato dos dois serviços de uma vez.
 
-Diferença única entre os dois: `DistribuicaoHelper.montarResponse` é **assíncrono** (precisa de gunzip nos `docZip`), `RecepcaoHelper.montarResponse` é síncrono.
+Diferença única entre os dois: `DistribuicaoHelper.montarResponse` é **assíncrono** (precisa de gunzip nos `docZip`), `RecepcaoHelper.montarResponse` é síncrono. Por isso o `await` acima é obrigatório na distribuição — sem ele, `json` seria a Promise, não a resposta — e o [recepcaoEvento-controller.js](../../../src/controllers/recepcaoEvento-controller.js) o dispensa. Escrevê-lo nos dois é inofensivo: `await` sobre valor não-Promise resolve para ele mesmo.
 
 O JSDoc de `enviar` em cada controller descreve o shape completo do retorno — é o que aparece no `dist/index.d.ts` como tipo de retorno dos métodos públicos.
 
@@ -100,5 +100,5 @@ A segunda usa `Math.floor(status / 100) > 2`, ou seja, **3xx também é erro** a
 ## Ao mexer aqui
 
 - Campo novo no retorno da SEFAZ: acrescentar em `montarResponse` **com `|| ''`** e atualizar o JSDoc do controller (é ele que vira tipo público) e o `README.md`.
-- Nunca lançar de dentro de helper por causa de resposta da SEFAZ — o contrato é devolver `error`.
+- Nunca lançar de dentro de helper por causa de resposta da SEFAZ — o contrato é devolver `error`. A única brecha conhecida é `Gzip.unzip` num `docZip` corrompido: a Promise rejeita dentro do `Promise.all` de `montarResponse` e a rejeição sobe até o chamador. Está registrada na [ADR 0004](../decisoes/0004-erro-de-configuracao-lanca-erro-de-rede-retorna.md); o conserto, quando vier, é convertê-la em `error` — não abrir a regra.
 - Toda classe daqui é exportada com `Object.freeze` e existe teste que garante isso.

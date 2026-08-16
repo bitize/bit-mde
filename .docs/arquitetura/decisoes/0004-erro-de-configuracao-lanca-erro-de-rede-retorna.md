@@ -32,7 +32,7 @@ if (!validator.isValid()) {
 }
 ```
 
-Nenhuma camada interna revalida. [SefazService](../../../src/services/sefaz-service.js) em particular **não exige `cert` e `key`**: instanciado sem eles, monta o `https.Agent` mesmo assim e deixa a falha acontecer no handshake, que vira retorno com `status` — a SEFAZ responde `403` — em vez de exceção. É contrato coberto por `test/sefaz.test.js` ("sem informar cert.pem e key.pem"), e é o que permite ao serviço ser usado direto em teste sem carregar certificado. Quem instancia controller ou service por fora de `apis/` fica sem a validação.
+Nenhuma camada interna revalida. [SefazService](../../../src/services/sefaz-service.js) em particular **não exige `cert` e `key`**: instanciado sem eles, monta o `https.Agent` mesmo assim e deixa a falha acontecer no servidor, que vira retorno com `status` em vez de exceção. Nos endpoints de **homologação** o observado é `403`, e é isso que `test/sefaz.test.js` afirma ("sem informar cert.pem e key.pem"); o código não garante esse número — qualquer resposta HTTP cai no ramo `error.response` e passa adiante o status que veio. Sem certificado o serviço continua utilizável direto em teste. Quem instancia controller ou service por fora de `apis/` fica sem a validação.
 
 Transporte — [SefazService.request](../../../src/services/sefaz-service.js) captura tudo e devolve `{ status, data }`. Quando não há resposta HTTP, o status é sintético e a mensagem vai embrulhada em `<error>…</error>`:
 
