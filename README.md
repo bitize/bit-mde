@@ -16,7 +16,7 @@ Desenvolvida e mantida pela equipe do **[BitERP](https://www.biterp.ai)**, onde 
 ## Instalação
 
 ```sh
-$ npm i @bitize/bit-mde
+npm i @bitize/bit-mde
 ```
 
 ## Pré-Requisitos

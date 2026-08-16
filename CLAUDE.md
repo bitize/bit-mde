@@ -44,7 +44,7 @@ Dois workflows, ambos em push e PR na `main`:
 
 Ambos usam `npm install` em vez de `npm ci` e não habilitam `cache: npm`, porque `package-lock.json` é gitignored — os dois exigem o lockfile versionado.
 
-`prettier.config.js` fixa `endOfLine: 'auto'` e isso é obrigatório enquanto não houver `.gitattributes`: com `core.autocrlf=true` no Windows o working tree fica em CRLF, enquanto a CI em Linux vê LF. Com o padrão `'lf'` do Prettier, `format:check` acusaria todos os arquivos na máquina dos devs e nenhum na CI. O Prettier é dependência de dev fixada — não trocar por `npx prettier` solto, que baixaria uma versão diferente a cada run.
+`prettier.config.js` fixa `endOfLine: 'auto'` e isso é obrigatório enquanto não houver `.gitattributes`: com `core.autocrlf=true` no Windows o working tree fica em CRLF, enquanto a CI em Linux vê LF. Com o padrão `'lf'` do Prettier, `format:check` acusaria todos os arquivos na máquina dos devs e nenhum na CI. O Prettier é dependência de dev fixada em versão exata (sem `^`) — sem lockfile versionado, um range deixaria a CI instalar um minor novo e reprovar `format:check` em arquivos intocados. Pelo mesmo motivo, não trocar por `npx prettier` solto, que baixaria uma versão diferente a cada run.
 
 ### Build e versão
 

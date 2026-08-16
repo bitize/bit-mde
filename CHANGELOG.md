@@ -8,7 +8,7 @@
 
 ### Segurança
 
-- Atualizado as dependências npm, zerando as 7 vulnerabilidades reportadas pelo `npm audit` (1 crítica, 5 altas, 1 moderada):
+- Atualizadas as dependências npm, zerando as 7 vulnerabilidades reportadas pelo `npm audit` (1 crítica, 5 altas, 1 moderada):
   - `axios` 1.8.3 → 1.19.0
   - `fast-xml-parser` 4.5.3 → 5.11.0
   - `node-forge` 1.3.1 → 1.4.0
