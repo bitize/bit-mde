@@ -124,7 +124,9 @@ Marcar as camadas impactadas e ler os docs correspondentes **antes** de especifi
 Rodar na raiz do repositório:
 
 - [ ] `npm run format` (ou conferir com `npm run format:check`)
-- [ ] `npm test` — com `certs/` presente; sem certificado real, `npm run certs:teste` antes
+- [ ] `npm run certs:teste` — se `certs/` ainda não existir (o script aborta se existir, para não sobrescrever certificado real)
+- [ ] `npm run test:ci` — tudo menos `test/sefaz.test.js`; é o que roda com o certificado descartável
+- [ ] `test/sefaz.test.js` rodado à parte (`npx mocha test/sefaz.test.js`) — exige certificado A1 válido e acesso à rede
 - [ ] `npm run build` — confere o JSDoc e regenera `lib/`, `dist/` e `src/env/version.js`
 - [ ] `git status` limpo, exceto o que a tarefa mudou de propósito
 
@@ -141,8 +143,9 @@ Executar **após o PR ser mergeado na `main`**:
 - [ ] Desvios registrados em "Notas de implementação"
 - [ ] Checklists marcados
 - [ ] Cabeçalho: **Status** = `done` e **Concluído em** preenchido
-- [ ] Issue fechada no GitHub
 - [ ] Arquivo movido: `git mv .docs/tasks/specified/GH-NN-descricao.md .docs/tasks/done/GH-NN-descricao.md`
+- [ ] Blockquote de especificação na issue apontando para `.docs/tasks/done/` (era `specified/`)
+- [ ] Issue fechada no GitHub
 
 ## Referências
 

@@ -22,9 +22,9 @@ Tratar as duas do mesmo jeito força o chamador a distinguir uma da outra na hor
 
 ## Decisão
 
-**Erro de configuração e de argumento lança, de forma síncrona. Erro de rede e da SEFAZ vira retorno.**
+**Erro de configuração e de argumento lança, de forma síncrona, na fronteira pública. Erro de rede e da SEFAZ vira retorno.**
 
-Validação — no construtor de `apis/` e no início de cada método público:
+A fronteira pública é `apis/`: o lançamento acontece **só** nos construtores e nos métodos públicos de [DistribuicaoDFe](../../../src/apis/distribuicaoDFe-api.js) e [RecepcaoEvento](../../../src/apis/recepcaoEvento-api.js), e em nenhuma camada abaixo.
 
 ```js
 if (!validator.isValid()) {
@@ -32,7 +32,9 @@ if (!validator.isValid()) {
 }
 ```
 
-Transporte — [SefazService.request](../../../src/services/sefaz-service.js) captura tudo e devolve `{ status, data }`, com status sintético e a mensagem embrulhada em `<error>…</error>`:
+Nenhuma camada interna revalida. [SefazService](../../../src/services/sefaz-service.js) em particular **não exige `cert` e `key`**: instanciado sem eles, monta o `https.Agent` mesmo assim e deixa a falha acontecer no handshake, que vira retorno com `status` — a SEFAZ responde `403` — em vez de exceção. É contrato coberto por `test/sefaz.test.js` ("sem informar cert.pem e key.pem"), e é o que permite ao serviço ser usado direto em teste sem carregar certificado. Quem instancia controller ou service por fora de `apis/` fica sem a validação.
+
+Transporte — [SefazService.request](../../../src/services/sefaz-service.js) captura tudo e devolve `{ status, data }`. Quando não há resposta HTTP, o status é sintético e a mensagem vai embrulhada em `<error>…</error>`:
 
 | Situação                 | `status` |
 | ------------------------ | -------- |

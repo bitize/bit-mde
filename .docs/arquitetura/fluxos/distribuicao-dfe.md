@@ -4,7 +4,7 @@ Consulta de documentos fiscais destinados a um CNPJ/CPF. Três formas de pergunt
 
 ## O caminho completo
 
-```
+```text
 DistribuicaoDFe.consultaUltNSU(ultNSU)      ← apis/distribuicaoDFe-api.js
   │  NsuValidator: exige valor, ≤ 15 chars, zero-pad para 15
   ▼

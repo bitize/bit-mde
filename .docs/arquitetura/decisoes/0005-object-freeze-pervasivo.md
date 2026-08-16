@@ -44,17 +44,25 @@ Há testes que asseguram o congelamento (`assert.throws` ao sobrescrever método
 
 **Compromisso de longo prazo:**
 
-Objetos congelados **atravessam camadas**, e quem recebe precisa saber disso. `requestOptions` e `httpsOptions` chegam congelados no `SefazService`, que por isso copia antes de mesclar:
+Objetos congelados **atravessam camadas**, e quem recebe precisa saber disso. `requestOptions` e `httpsOptions` chegam congelados no `SefazService`, que hoje só os usa como **fonte** de mescla, nunca como alvo:
 
 ```js
 const AgentOptions = Object.assign(
   { cert, key, ca, rejectUnauthorized: false },
-  { ...opts.httpsOptions } // o spread não é redundante
+  { ...opts.httpsOptions }
 )
 ```
 
-Sem essa cópia, `Object.assign` escreveria no objeto congelado. Foi exatamente a origem do bug **`Cannot add property rejectUnauthorized, object is not extensible`** ([#22](https://github.com/lucashpmelo/node-mde/issues/22), corrigido na 0.14.13).
+`Object.assign` escreve no primeiro argumento, e aqui esse argumento é um literal recém-criado — o objeto congelado nunca é destino. A versão anterior, porém, **mutava `opts.httpsOptions` direto**, antes da mescla:
 
-A lição vale para qualquer código novo: **objeto vindo de `this.config` é congelado — copie antes de mutar.** Uma "simplificação" que remova o spread reintroduz o mesmo bug, e ele só aparece em runtime, no consumidor que passa `httpsOptions`.
+```js
+if (opts.tpAmb === '1' && 'rejectUnauthorized' in opts.httpsOptions === false) {
+  opts.httpsOptions['rejectUnauthorized'] = false
+}
+```
+
+Era essa linha a origem do bug **`Cannot add property rejectUnauthorized, object is not extensible`** ([#22](https://github.com/lucashpmelo/node-mde/issues/22), corrigido na 0.14.13). O conserto foi apagá-la e mover o default `rejectUnauthorized: false` para dentro do literal.
+
+A lição vale para qualquer código novo: **objeto vindo de `this.config` é congelado — copie antes de mutar.** A regra se aplica a escrita, não a leitura: mesclar a partir dele é seguro; atribuir nele lança em runtime, no consumidor que passa `httpsOptions`.
 
 Vale notar o que o congelamento **não** cobre: `Object.freeze` é raso, e `{ ...this.config }` produz objeto novo e mutável — é assim que os métodos públicos acrescentam `nsu`/`chNFe` a `opts` sem violar nada.

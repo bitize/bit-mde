@@ -25,7 +25,9 @@ Detalhe que engana: os objetos são declarados com chave **numérica** (`1:` e `
 
 ## `CA` — a cadeia ICP-Brasil
 
-Usada como `ca` do `https.Agent`. Existe para que quem quiser validar a cadeia consiga (`httpsOptions: { rejectUnauthorized: true }`) sem carregar a ICP-Brasil por conta própria — o default do serviço é `rejectUnauthorized: false`. Ver [services-sefaz.md](services-sefaz.md).
+Usada como `ca` do `https.Agent`. Existe para que quem quiser validar a cadeia consiga sem carregar a ICP-Brasil por conta própria.
+
+> ⚠️ O default do serviço é `rejectUnauthorized: false`, ou seja, **o certificado do servidor não é verificado** — é comportamento inseguro, mantido por compatibilidade com as versões anteriores (ver [services-sefaz.md](services-sefaz.md)). **Em produção, passar `httpsOptions: { rejectUnauthorized: true }`**; a cadeia em `CA` já é enviada ao agent, então a verificação funciona sem configuração adicional.
 
 Cadeia de AC tem validade. Quando um certificado do arquivo expirar ou a ICP-Brasil publicar uma AC nova, este arquivo precisa ser atualizado e o pacote republicado — é manutenção previsível, não incidente.
 

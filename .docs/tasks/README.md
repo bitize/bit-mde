@@ -6,7 +6,7 @@ A especificação mora aqui; a issue no GitHub serve de rastreador e de canal co
 
 ## Estrutura
 
-```
+```text
 .docs/tasks/
 ├── _templates/          # template padrão
 │   └── task-template.md
@@ -18,7 +18,7 @@ A especificação mora aqui; a issue no GitHub serve de rastreador e de canal co
 
 ## Ciclo de vida
 
-```
+```text
 ┌────────┐      ┌───────────┐      ┌──────┐
 │ drafts │ ───► │ specified │ ───► │ done │
 └────────┘      └───────────┘      └──────┘
@@ -89,7 +89,7 @@ Cada tarefa em `specified/`, `done/` e `canceled/` tem uma issue correspondente.
 
 1. Criar a issue:
 
-   ```sh
+   ```bash
    gh issue create --title "<título da tarefa>" --body-file <(…)
    ```
 
@@ -112,7 +112,9 @@ Cada tarefa em `specified/`, `done/` e `canceled/` tem uma issue correspondente.
    > **Especificação completa:** `.docs/tasks/specified/GH-NN-descricao-curta.md`
    ```
 
-Regras: até ~300 palavras no resumo, sem duplicar o conteúdo do arquivo, e o blockquote final com o caminho real do arquivo é obrigatório.
+Regras: até ~300 palavras no resumo, sem duplicar o conteúdo do arquivo, e o blockquote final com o **caminho real do arquivo** é obrigatório.
+
+> **O caminho envelhece a cada `git mv`.** O blockquote aponta para `specified/` enquanto a tarefa está lá, mas o arquivo muda de diretório ao ser concluída ou cancelada. Toda vez que a tarefa mudar de status, editar o blockquote na issue trocando `specified/` pelo diretório de destino — `done/` ou `canceled/`. Sem isso a issue passa a apontar para um caminho que não existe mais.
 
 > O repositório é **público**: qualquer pessoa lê as issues. Não colocar em issue dado de certificado, CNPJ de cliente, chave de NF-e real ou trecho de XML de produção. Se for necessário para o diagnóstico, anonimizar.
 
@@ -127,7 +129,8 @@ O arquivo em `done/` deve ser um retrato fiel do que foi entregue — é registr
 3. **Notas de implementação** — registrar todo **desvio** em relação à especificação e a justificativa. Se não houve, escrever "Sem desvios". Não deixar item em branco sem contexto;
 4. **Histórico de revisões** — nova linha descrevendo a entrega;
 5. **Mover para `done/`** com `git mv`;
-6. **Fechar a issue** no GitHub.
+6. **Corrigir o blockquote de especificação na issue** — trocar `.docs/tasks/specified/` por `.docs/tasks/done/`;
+7. **Fechar a issue** no GitHub.
 
 ## Ao cancelar a tarefa
 
@@ -137,7 +140,8 @@ O arquivo **não** se apaga — ele registra a decisão.
 2. **Motivo** — bloco logo após o cabeçalho explicando por que foi cancelada e, se houver, qual tarefa a substitui. PR aberto, referenciar (mergeado ou não);
 3. **Histórico de revisões** — linha com o cancelamento;
 4. **Mover para `canceled/`** com `git mv`;
-5. **Fechar a issue** como `not planned`.
+5. **Corrigir o blockquote de especificação na issue** — trocar `.docs/tasks/specified/` por `.docs/tasks/canceled/`;
+6. **Fechar a issue** como `not planned`.
 
 > Os checklists de implementação ficam **como estão**, desmarcados: o arquivo em `canceled/` é o retrato da especificação que não foi executada, não um relatório de entrega.
 

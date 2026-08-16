@@ -4,7 +4,7 @@ Envio de lote de eventos de manifestação. É o único fluxo que **assina** XML
 
 ## O caminho completo
 
-```
+```text
 RecepcaoEvento.enviarEvento({ idLote, lote })      ← apis/recepcaoEvento-api.js
   │  LoteValidator: array com 1 a 20 eventos; default idLote = '1'
   │  para cada item: EventoValidator → resolve tpEvento/descEvento

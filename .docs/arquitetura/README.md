@@ -11,7 +11,7 @@ A biblioteca não guarda estado, não persiste nada e não faz retry: ela monta 
 
 As camadas são fixas e cada uma só conhece a de baixo:
 
-```
+```text
 apis/                classe pública; valida a config no construtor e congela (Object.freeze)
   └ validators/      normaliza a entrada e produz a mensagem de erro
 controllers/         static enviar(opts): montarRequest → envia → montarResponse → montarRetorno
@@ -61,4 +61,4 @@ Cinco regras valem em qualquer arquivo de `src/`. Quebrar uma delas quebra teste
 2. **Imutabilidade.** Praticamente todo módulo exporta `Object.freeze(Classe)`, e as instâncias de `apis/` congelam `this` e `this.config`. Ver [ADR 0005](decisoes/0005-object-freeze-pervasivo.md).
 3. **`tpAmb` é string.** `'1'` produção, `'2'` homologação — é a chave dos mapas em [src/env/distribuicao.js](../../src/env/distribuicao.js) e [src/env/recepcao.js](../../src/env/recepcao.js).
 4. **Idioma e mensagens.** Domínio, nomes de arquivo/classe e mensagens de erro em português. As mensagens são comparadas **literalmente** nos testes (`assert.strictEqual(err.message, 'NSU não informado.')`) — mudar o texto quebra teste.
-5. **Estilo.** Prettier: sem ponto e vírgula, aspas simples, 2 espaços, trailing comma `es5`. Todo módulo começa com `'use strict'`. Sem TypeScript no fonte — a tipagem pública sai do JSDoc de `src/apis/`. Ver [ADR 0006](decisoes/0006-js-com-jsdoc-em-vez-de-typescript.md).
+5. **Estilo.** Prettier: sem ponto e vírgula, aspas simples, 2 espaços, trailing comma `es5`. Todo módulo começa com `'use strict'` — **exceto os de [src/env/](../../src/env/)**, que são módulos de dado e não o declaram (ver [camadas/env.md](camadas/env.md)). Sem TypeScript no fonte — a tipagem pública sai do JSDoc de `src/apis/`. Ver [ADR 0006](decisoes/0006-js-com-jsdoc-em-vez-de-typescript.md).

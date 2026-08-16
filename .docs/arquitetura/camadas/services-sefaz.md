@@ -15,7 +15,7 @@ const AgentOptions = Object.assign(
 )
 ```
 
-> **O spread `{ ...opts.httpsOptions }` não é redundante.** `httpsOptions` chega **congelado** de `apis/` (ver [apis.md](apis.md)). `Object.assign` escreve no primeiro argumento, então sem a cópia o alvo poderia ser o objeto congelado — foi exatamente a origem do bug `Cannot add property rejectUnauthorized, object is not extensible` (#22, corrigido na 0.14.13). Ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
+> **`httpsOptions` chega congelado de `apis/`** (ver [apis.md](apis.md)), e é o que dita a forma dessa mescla. `Object.assign` escreve no **primeiro** argumento, que aqui é um literal recém-criado — o objeto congelado é só fonte, nunca alvo, então não é por causa dele que o spread `{ ...opts.httpsOptions }` existe. O que causou o bug `Cannot add property rejectUnauthorized, object is not extensible` (#22, corrigido na 0.14.13) foi outra coisa: antes da mescla havia uma linha que **mutava o objeto congelado direto**, `opts.httpsOptions['rejectUnauthorized'] = false`. O conserto foi apagá-la e mover o default para dentro do literal. A regra que sobra: **objeto vindo de `this.config` não se muta — copie antes.** Ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
 
 ### `https.Agent`
 
@@ -25,7 +25,9 @@ const AgentOptions = Object.assign(
 | `ca`                 | Cadeia ICP-Brasil de [src/env/ca.js](../../../src/env/ca.js) |
 | `rejectUnauthorized` | `false` por padrão, sobrescritível por `httpsOptions`        |
 
-`rejectUnauthorized: false` é o default histórico, adotado porque endpoints da SEFAZ apresentavam cadeia incompleta. A cadeia própria em `ca` existe justamente para permitir que quem quiser endureça a verificação passando `httpsOptions: { rejectUnauthorized: true }` sem precisar carregar a ICP-Brasil por conta própria.
+`rejectUnauthorized: false` é o default histórico, adotado porque endpoints da SEFAZ apresentavam cadeia incompleta. É um default **inseguro**: nessa configuração o certificado do servidor não é verificado, e a conexão fica exposta a interceptação. Ele é mantido só por compatibilidade com as versões anteriores.
+
+> **Em produção, passar `httpsOptions: { rejectUnauthorized: true }`.** A cadeia própria em `ca` já vai no agent, então a verificação funciona sem carregar a ICP-Brasil por conta própria.
 
 ### Instância axios
 

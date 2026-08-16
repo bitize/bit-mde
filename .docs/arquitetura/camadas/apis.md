@@ -58,7 +58,7 @@ this.config = Object.freeze({
 Object.freeze(this)
 ```
 
-O congelamento é em dois níveis — `config` e os dois objetos de options dentro dele. É por isso que o `SefazService` precisa copiar antes de mesclar; ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
+O congelamento é em dois níveis — `config` e os dois objetos de options dentro dele. Quem recebe esses objetos pode lê-los e mesclá-los, mas **não pode escrever neles**; ver [ADR 0005](../decisoes/0005-object-freeze-pervasivo.md).
 
 ## Métodos públicos
 

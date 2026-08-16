@@ -59,7 +59,7 @@ Três funções estáticas em [src/util/xml.js](../../../src/util/xml.js):
 
 Concatena o envelope **SOAP 1.2** em volta do corpo:
 
-```
+```text
 <?xml version="1.0" encoding="utf-8"?><soap12:Envelope …><soap12:Body>…</soap12:Body></soap12:Envelope>
 ```
 
@@ -78,6 +78,6 @@ Template literal, uma linha, sem espaço em branco entre as tags. Isso importa n
 | `parseTagValue`       | `false`   | **Crítico:** mantém tudo string                  |
 | `trimValues`          | `true`    | A SEFAZ indenta o XML                            |
 
-Os dois `false` são o que impede o parser de converter `cStat` `'000'` em `0`, chave de NF-e em notação científica e NSU com zeros à esquerda em número. **Todo campo de retorno é string** — essa é a garantia de contrato da biblioteca, e há teste cobrindo.
+Os dois `false` são o que impede o parser de converter `cStat` `'000'` em `0`, chave de NF-e em notação científica e NSU com zeros à esquerda em número. **Todo campo escalar do retorno é string** — essa é a garantia de contrato da biblioteca, e há teste cobrindo. Campos repetíveis continuam sendo estrutura: `docZip` (distribuição) e `retEvento` (recepção) são sempre **array**, normalizados pelos helpers, e cada item traz seus próprios campos escalares em string mais o `json` já parseado. Ver [controllers-helpers.md](controllers-helpers.md).
 
 Note que o parser é instanciado a cada chamada (não há instância compartilhada) e que `xmlToJson` **não valida** o XML: entrada malformada devolve o que o parser conseguiu montar, e a leitura defensiva dos helpers absorve o resto.

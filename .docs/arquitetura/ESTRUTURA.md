@@ -65,6 +65,6 @@ No mesmo PR:
 
 O Markdown daqui passa pelo Prettier e é verificado pelo `format:check` do job `qualidade`. Rodar `npm run format` antes de commitar.
 
-Não brigar com o formatador: escrever a tabela sem se preocupar com alinhamento, que ele repada. O que ele **não** faz é reflowar parágrafo (`proseWrap` fica no padrão `preserve`) nem tocar no conteúdo de bloco de código — os diagramas ASCII de `fluxos/` estão protegidos por isso.
+Não brigar com o formatador: escrever a tabela sem se preocupar com alinhamento, que ele repara. O que ele **não** faz é reflowar parágrafo (`proseWrap` fica no padrão `preserve`) nem tocar no conteúdo de bloco de código — os diagramas ASCII de `fluxos/` estão protegidos por isso.
 
 O efeito colateral a conhecer: mudar a largura de uma célula faz o Prettier realinhar a coluna inteira, então uma edição de uma palavra vira diff de várias linhas. Em review, ligar "hide whitespace changes".

@@ -70,8 +70,11 @@ Se `Xml.xmlToJson` produziu um objeto com `error` (caso da resposta sintética d
 [src/helpers/retorno-helper.js](../../../src/helpers/retorno-helper.js) é a única definição do formato de retorno público:
 
 ```js
-{
-  ;(data, reqXml, resXml, status)
+const retorno = {
+  data: json,
+  reqXml: data,
+  resXml: retornoSefaz.data,
+  status: retornoSefaz.status,
 }
 ```
 

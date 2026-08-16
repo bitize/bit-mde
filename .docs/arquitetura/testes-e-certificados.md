@@ -84,7 +84,7 @@ Duas famílias de teste existem para travar invariantes de arquitetura, e é com
 
 [.github/workflows/testes.yml](../../.github/workflows/testes.yml), matriz Node 20/22/24:
 
-```
+```text
 npm ci  →  npm run certs:teste  →  npm run test:ci
 ```
 
